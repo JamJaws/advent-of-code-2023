@@ -1,8 +1,10 @@
 [versions]
 junit-jupiter-engine = "5.10.0"
+kotest-assertions-core = "5.8.0"
 
 [libraries]
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest-assertions-core" }
 
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.20" }

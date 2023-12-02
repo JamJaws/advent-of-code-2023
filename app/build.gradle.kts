@@ -10,6 +10,7 @@ repositories {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.kotest.assertions.core)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
