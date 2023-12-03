@@ -13,4 +13,9 @@ class Day03Test {
         Day03().part1(text) shouldBe 4361
     }
 
+    @Test
+    fun part2() {
+        Day03().part2(text) shouldBe 467835
+    }
+
 }
