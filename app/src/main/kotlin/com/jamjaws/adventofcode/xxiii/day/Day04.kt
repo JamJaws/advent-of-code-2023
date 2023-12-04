@@ -8,10 +8,7 @@ class Day04 {
 
     fun part1(text: List<String>): Int =
         text.asSequence()
-            .map { it.substringAfter(":") }
-            .map { it.split('|') }
-            .map { it.map(Regex("\\d+")::findAll).map { it.flatMap(MatchResult::groupValues).toList() } }
-            .map { (winningNumbers, elfNumbers) -> elfNumbers.intersect(winningNumbers) }
+            .map(::getMatches)
             .map(Set<String>::size)
             .map { 2.0.pow(it - 1).toInt() }
             .sum()
@@ -19,13 +16,15 @@ class Day04 {
     fun part2(text: List<String>): Int {
         val scratchcards = text.map { line ->
             val cardId = Regex("\\d+").find(line)!!.value.toInt()
-            val matches = line.substringAfter(":").split('|')
-                .map(Regex("\\d+")::findAll).map { it.flatMap(MatchResult::groupValues).toList() }
-                .let { (winningNumbers, elfNumbers) -> elfNumbers.intersect(winningNumbers) }
+            val matches = getMatches(line)
             Scratchcard(cardId, (cardId + 1..(cardId + matches.size)).map { it })
         }
         return scratchcards.sumOf { instances(it, scratchcards) }
     }
+
+    private fun getMatches(line: String) = line.substringAfter(":").split('|').map(Regex("\\d+")::findAll)
+        .map { it.flatMap(MatchResult::groupValues).toList() }
+        .let { (winningNumbers, elfNumbers) -> elfNumbers.intersect(winningNumbers) }
 
     private fun instances(scratchcard: Scratchcard, scratchcards: List<Scratchcard>): Int =
         scratchcards.filter { item -> item.copies.contains(scratchcard.card) }
