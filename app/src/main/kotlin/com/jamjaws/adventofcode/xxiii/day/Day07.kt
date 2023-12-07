@@ -6,24 +6,29 @@ class Day07 {
 
     companion object {
         private val CARD_OPTIONS = listOf('A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2')
+        private val CARD_OPTIONS_JOKER = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J')
     }
 
     fun part1(text: List<String>): Int =
         text.asSequence()
-            .map {
-                val (cards, bid) = it.split(' ')
-                Hand(cards, getHandType(cards), bid.toInt())
-            }.sortedWith(compareBy<Hand> { it.type.ordinal }
-                .thenBy { CARD_OPTIONS.indexOf(it.cards.first()) }
-                .thenBy { CARD_OPTIONS.indexOf(it.cards[1]) }
-                .thenBy { CARD_OPTIONS.indexOf(it.cards[2]) }
-                .thenBy { CARD_OPTIONS.indexOf(it.cards[3]) }
-                .thenBy { CARD_OPTIONS.indexOf(it.cards[4]) }
-            ).map(Hand::bid)
+            .map { parseHand(it, ::getHandType) }
+            .sortedWith(getHandComparator(CARD_OPTIONS))
+            .map(Hand::bid)
             .mapIndexed { index, bid -> bid * (text.size - index) }
             .sum()
 
-    fun part2(text: List<String>): Int = TODO("2")
+    fun part2(text: List<String>): Int =
+        text.asSequence()
+            .map { parseHand(it, ::getHandTypeWithJoker) }
+            .sortedWith(getHandComparator(CARD_OPTIONS_JOKER))
+            .map(Hand::bid)
+            .mapIndexed { index, bid -> bid * (text.size - index) }
+            .sum()
+
+    private fun parseHand(line: String, getHandType: (String) -> HandType): Hand {
+        val (cards, bid) = line.split(' ')
+        return Hand(cards, getHandType(cards), bid.toInt())
+    }
 
     private fun getHandType(cards: String): HandType {
         val distinctCards = cards.toSet()
@@ -37,6 +42,27 @@ class Day07 {
             else -> HandType.HighCard
         }
     }
+
+    private fun getHandTypeWithJoker(cards: String): HandType {
+        val distinctCardsMinusJ = cards.toSet() - 'J'
+        val jokerCount = cards.count { it == 'J' }
+        return when {
+            distinctCardsMinusJ.size in 0..1 -> HandType.FiveOfAKind
+            distinctCardsMinusJ.size == 2 && distinctCardsMinusJ.any { distinctCard -> jokerCount + cards.count { it == distinctCard } == 4 } -> HandType.FourOfAKind
+            distinctCardsMinusJ.size == 2 && distinctCardsMinusJ.any { distinctCard -> jokerCount + cards.count { it == distinctCard } == 3 } -> HandType.FullHouse
+            distinctCardsMinusJ.size == 3 && distinctCardsMinusJ.any { distinctCard -> jokerCount + cards.count { it == distinctCard } == 3 } -> HandType.ThreeOfAKind
+            distinctCardsMinusJ.size == 3 && distinctCardsMinusJ.any { distinctCard -> jokerCount + cards.count { it == distinctCard } == 2 } -> HandType.TwoPair
+            distinctCardsMinusJ.size == 4 -> HandType.OnePair
+            else -> HandType.HighCard
+        }
+    }
+
+    private fun getHandComparator(cardOptionsSorted: List<Char>) = compareBy<Hand> { it.type.ordinal }
+        .thenBy { cardOptionsSorted.indexOf(it.cards.first()) }
+        .thenBy { cardOptionsSorted.indexOf(it.cards[1]) }
+        .thenBy { cardOptionsSorted.indexOf(it.cards[2]) }
+        .thenBy { cardOptionsSorted.indexOf(it.cards[3]) }
+        .thenBy { cardOptionsSorted.indexOf(it.cards[4]) }
 
 }
 
@@ -56,6 +82,6 @@ data class Hand(val cards: String, val type: HandType, val bid: Int)
 fun main() {
     val answer1 = Day07().part1(readInput("Day07"))
     println(answer1)
-//    val answer2 = Day07().part2(readInput("Day07"))
-//    println(answer2)
+    val answer2 = Day07().part2(readInput("Day07"))
+    println(answer2)
 }

@@ -15,6 +15,7 @@ class Day07Test {
 
     @Test
     fun part2() {
+        Day07().part2(text) shouldBe 5905
     }
 
 }
